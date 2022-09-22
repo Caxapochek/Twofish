@@ -8,25 +8,25 @@ namespace ConsoleAppTwofish
 {
     public class AlgorithmTwofish
     {
-        static private byte[,] RS = new byte[,]
+        static private readonly byte[,] RS = new byte[,]
                                         {{0x01, 0xA4, 0x55, 0x87, 0x5A, 0x58, 0xDB, 0x9E},
                                         {0xA4, 0x56, 0x82, 0xF3, 0x1E, 0xC6, 0x68, 0xE5},
                                         {0x02, 0xA1, 0xFC, 0xC1, 0x47, 0xAE, 0x3D, 0x19},
                                         {0xA4, 0x55, 0x87, 0x5A, 0x58, 0xDB, 0x9E, 0x03}};
-        static private byte[,] tq0 = new byte[,]
+        static private readonly byte[,] tq0 = new byte[,]
                                         {{0x8, 0x1, 0x7, 0xD, 0x6, 0xF, 0x3, 0x2, 0x0, 0xB, 0x5, 0x9, 0xE, 0xC, 0xA, 0x4},
                                         {0xE, 0xC, 0xB, 0x8, 0x1, 0x2, 0x3, 0x5, 0xF, 0x4, 0xA, 0x6, 0x7, 0x0, 0x9, 0xD},
                                         {0xB, 0xA, 0x5, 0xE, 0x6, 0xD, 0x9, 0x0, 0xC, 0x8, 0xF, 0x3, 0x2, 0x4, 0x7, 0x1},
                                         {0xD, 0x7, 0xF, 0x4, 0x1, 0x2, 0x6, 0xE, 0x9, 0xB, 0x3, 0x0, 0x8, 0x5, 0xC, 0xA}};
-        static private byte[,] tq1 = new byte[,]
+        static private readonly byte[,] tq1 = new byte[,]
                                         {{0x2, 0x8, 0xB, 0xD, 0xF, 0x7, 0x6, 0xE, 0x3, 0x1, 0x9, 0x4, 0x0, 0xA, 0xC, 0x5},
                                         {0x1, 0xE, 0x2, 0xB, 0x4, 0xC, 0x3, 0x7, 0x6, 0xD, 0xA, 0x5, 0xF, 0x9, 0x0, 0x8},
                                         {0x4, 0xC, 0x7, 0x5, 0x1, 0x6, 0x9, 0xA, 0x0, 0xE, 0xD, 0x8, 0x2, 0xB, 0x3, 0xF},
                                         {0xB, 0x9, 0x5, 0x1, 0xC, 0x3, 0xD, 0xE, 0x6, 0x4, 0x7, 0xF, 0x2, 0x0, 0x8, 0xA}};
 
-        static private List<byte[,]> tq = new List<byte[,]> { tq0, tq1 };
+        static private readonly List<byte[,]> tq = new List<byte[,]> { tq0, tq1 };
 
-        static private byte[,] MDS = new byte[,]
+        static private readonly byte[,] MDS = new byte[,]
                                         {{0x01, 0xEF, 0x5B, 0x5B},
                                         {0x5B, 0xEF, 0xEF, 0x01},
                                         {0xEF, 0x5B, 0x01, 0xEF},
@@ -58,6 +58,9 @@ namespace ConsoleAppTwofish
 
         public byte[] Encrypt(byte[] plaintext)
         {
+            // KeyShedule 
+            KeyShedule(out k_keys, out s_keys, ref key);
+
             List<byte> plaintext_list = plaintext.ToList();
             List<byte> ciphertext_list = new List<byte>();
             while (plaintext_list.Count%16 != 0)
@@ -71,6 +74,9 @@ namespace ConsoleAppTwofish
 
         public byte[] Decrypt(byte[] ciphertext)
         {
+            // Ключевое расписание
+            KeyShedule(out k_keys, out s_keys, ref key);
+
             List<byte> plaintext_list = new List<byte>();
             List<byte> ciphertext_list = ciphertext.ToList();
             while (ciphertext_list.Count % 16 != 0)
@@ -99,9 +105,6 @@ namespace ConsoleAppTwofish
                     text_branches[i][j] = plaintext[i * 4 + j];
                 }
             }
-
-            // KeyShedule - 
-            KeyShedule(out k_keys, out s_keys, ref key);
 
             // Входное отбеливание
             byte[][] keys_input_whitening = new byte[][] { k_keys[0], k_keys[1], k_keys[2], k_keys[3] };
@@ -151,9 +154,6 @@ namespace ConsoleAppTwofish
                     text_branches[i][j] = ciphertext[i * 4 + j];
                 }
             }
-
-            // Ключевое расписание
-            KeyShedule(out k_keys, out s_keys, ref key);
 
             // Входное отбеливание
             byte[][] keys_input_whitening = new byte[][] { k_keys[4], k_keys[5], k_keys[6], k_keys[7] };
@@ -469,7 +469,7 @@ namespace ConsoleAppTwofish
             uint inp1_uint = (uint)BytesToInt(inp1);
             uint inp2_uint = (uint)BytesToInt(inp2);
 
-            byte[] result = IntToBytes((int)(inp1_uint + inp1_uint));
+            byte[] result = IntToBytes((int)(inp1_uint + inp2_uint));
 
             return result;
         }
