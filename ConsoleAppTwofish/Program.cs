@@ -13,9 +13,9 @@ namespace ConsoleAppTwofish
     {
         static void Main()
         {
-            string file = @"D:\test\anna_1Mb.txt";
+            string file = @"D:\test2\install.exe.bin";
 
-            string outFile = Path.Combine(@"D:\test\", Path.GetFileName(file) + ".bin");
+            string outFile = Path.Combine(@"D:\test2\", Path.GetFileName(file) + ".bin");
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();

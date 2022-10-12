@@ -67,7 +67,8 @@ namespace ConsoleAppTwofish
                 plaintext_list.Add(0);
             for(int i = 0; i < plaintext_list.Count; i += 16)
             {
-                ciphertext_list.AddRange(Encrypt_block(plaintext_list.GetRange(i,16).ToArray()));
+                ciphertext_list.AddRange(
+                    Encrypt_block(plaintext_list.GetRange(i,16).ToArray()));
             }
             return ciphertext_list.ToArray();
         }
@@ -91,7 +92,8 @@ namespace ConsoleAppTwofish
         public byte[] Encrypt_block(byte[] plaintext)
         {
             if (plaintext.Length != 16)
-                throw new Exception("Something go wrong! The block size is not equal to 128");
+                throw new Exception("Something go wrong! " +
+                    "The block size is not equal to 128");
             if (key == null)
                 throw new Exception("Key is null. Use SetKey method.");
 
@@ -107,13 +109,17 @@ namespace ConsoleAppTwofish
             }
 
             // Входное отбеливание
-            byte[][] keys_input_whitening = new byte[][] { k_keys[0], k_keys[1], k_keys[2], k_keys[3] };
+            byte[][] keys_input_whitening = new byte[][] {  k_keys[0], 
+                                                            k_keys[1], 
+                                                            k_keys[2], 
+                                                            k_keys[3] };
             Whitening(ref text_branches, ref keys_input_whitening);
 
             // 16 раундов сети Фейстеля
             for (int round = 0; round < 16; round++)
             {
-                byte[][] f_result = f_function(text_branches[0], text_branches[1], round);
+                byte[][] f_result = f_function( text_branches[0],
+                    text_branches[1], round);
 
                 byte[] c2 = XOR(f_result[0], text_branches[2]);
                 c2 = ROR(c2, 1);
@@ -121,11 +127,15 @@ namespace ConsoleAppTwofish
                 c3 = ROL(c3, 1);
                 c3 = XOR(f_result[1], c3);
 
-                text_branches = new byte[][] { c2, c3, text_branches[0], text_branches[1] };
+                text_branches = new byte[][] { c2, c3, 
+                    text_branches[0], text_branches[1] };
             }
 
             //Выходное отбеливание
-            byte[][] keys_output_whitening = new byte[][] { k_keys[4], k_keys[5], k_keys[6], k_keys[7] };
+            byte[][] keys_output_whitening = new byte[][] { k_keys[4], 
+                                                            k_keys[5], 
+                                                            k_keys[6], 
+                                                            k_keys[7] };
             Whitening(ref text_branches, ref keys_output_whitening);
 
             // Слияние 4 ветвей в конечный закрытый текст
@@ -140,7 +150,8 @@ namespace ConsoleAppTwofish
         public byte[] Decrypt_block(byte[] ciphertext)
         {
             if (ciphertext.Length != 16)
-                throw new Exception("Something go wrong! The block size is not equal to 128");
+                throw new Exception("Something go wrong! " +
+                    "The block size is not equal to 128");
             if (key == null)
                 throw new Exception("Key is null. Use SetKey method.");
 
@@ -156,25 +167,33 @@ namespace ConsoleAppTwofish
             }
 
             // Входное отбеливание
-            byte[][] keys_input_whitening = new byte[][] { k_keys[4], k_keys[5], k_keys[6], k_keys[7] };
+            byte[][] keys_input_whitening = new byte[][] {  k_keys[4], 
+                                                            k_keys[5], 
+                                                            k_keys[6], 
+                                                            k_keys[7] };
             Whitening(ref text_branches, ref keys_input_whitening);
 
             // 16 раундов сети Фейстеля
             for (int round = 15; round > -1; round--)
             {
 
-                byte[][] f_result = f_function(text_branches[2], text_branches[3], round);
+                byte[][] f_result = f_function(text_branches[2], 
+                    text_branches[3], round);
 
                 byte[] c2 = ROL(text_branches[0], 1);
                 c2 = XOR(f_result[0], c2);
                 byte[] c3 = XOR(f_result[1], text_branches[1]);
                 c3 = ROR(c3, 1);
 
-                text_branches = new byte[][] { text_branches[2], text_branches[3], c2, c3 };
+                text_branches = new byte[][] { text_branches[2], 
+                    text_branches[3], c2, c3 };
             }
 
             //Выходное отбеливание
-            byte[][] keys_output_whitening = new byte[][] { k_keys[0], k_keys[1], k_keys[2], k_keys[3] };
+            byte[][] keys_output_whitening = new byte[][] { k_keys[0], 
+                                                            k_keys[1], 
+                                                            k_keys[2], 
+                                                            k_keys[3] };
             Whitening(ref text_branches, ref keys_output_whitening);
 
             // Слияние 4 ветвей в конечный закрытый текст
@@ -222,11 +241,8 @@ namespace ConsoleAppTwofish
                     s_keys[i][j] = rez[j, 0];
                 }
             }
-
             // Построение K ключей            
             k_keys = h_function(m_even, m_odd);
-
-
         }
 
         private void Whitening(ref byte[][] text, ref byte[][] keys)
@@ -247,11 +263,19 @@ namespace ConsoleAppTwofish
 
             for(byte i = 0; i < 40; i+=2)
             {
-                byte[,] key_1_matrix = MatrixMultiplication(MDS, h_function_Sboxs(i,M2, M0), 0x69); // x^8 + x^6 + x^5 + x^3 + 1
-                byte[,] key_2_matrix = MatrixMultiplication(MDS, h_function_Sboxs((byte)(i+1), M3, M1), 0x69); // x^8 + x^6 + x^5 + x^3 + 1 
+                byte[,] key_1_matrix = MatrixMultiplication(
+                    MDS, h_function_Sboxs(i,M2, M0), 0x69);
+                byte[,] key_2_matrix = MatrixMultiplication(
+                    MDS, h_function_Sboxs((byte)(i+1), M3, M1), 0x69);
 
-                byte[] key_1 = { key_1_matrix[0, 0], key_1_matrix[1, 0], key_1_matrix[2, 0], key_1_matrix[3, 0] };
-                byte[] key_2 = { key_2_matrix[0, 0], key_2_matrix[1, 0], key_2_matrix[2, 0], key_2_matrix[3, 0] };
+                byte[] key_1 = {    key_1_matrix[0, 0],
+                                    key_1_matrix[1, 0], 
+                                    key_1_matrix[2, 0], 
+                                    key_1_matrix[3, 0] };
+                byte[] key_2 = {    key_2_matrix[0, 0], 
+                                    key_2_matrix[1, 0], 
+                                    key_2_matrix[2, 0], 
+                                    key_2_matrix[3, 0] };
 
                 key_2 = ROL(key_2, 8);
 
@@ -260,8 +284,7 @@ namespace ConsoleAppTwofish
                 key_2 = ROL(key_2,9);
 
                 k_keys[i] = key_1;
-                k_keys[i+1] = key_2;
-                
+                k_keys[i+1] = key_2;                
             }
 
             return k_keys;
@@ -298,8 +321,11 @@ namespace ConsoleAppTwofish
 
         private byte[] g_function(byte[] R)
         {
-            byte[,] Z_matrix = MatrixMultiplication(MDS, Sboxs(R), 0x69);  // x^8 + x^6 + x^5 + x^3 + 1
-            byte[] Z = { Z_matrix[0, 0], Z_matrix[1, 0], Z_matrix[2, 0], Z_matrix[3, 0] };
+            byte[,] Z_matrix = MatrixMultiplication(MDS, Sboxs(R), 0x69);
+            byte[] Z = { Z_matrix[0, 0], 
+                         Z_matrix[1, 0], 
+                         Z_matrix[2, 0], 
+                         Z_matrix[3, 0] };
             return Z;
         }
 
