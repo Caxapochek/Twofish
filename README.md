@@ -1,5 +1,7 @@
 # Twofish 
 
+## This project is implementation of the TwoFish encryption algorithm in C#
+
 ### Общие сведения о Twofish
 
 Twofish разрабатывался специально с учетом требований и рекомендаций NIST для AES:  
